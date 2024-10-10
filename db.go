@@ -3,12 +3,10 @@ package main
 import (
 	"github.com/syndtr/goleveldb/leveldb"
 	"log"
-	"sync"
 )
 
 var (
 	db   *leveldb.DB
-	lock sync.Mutex
 )
 
 func InitDB(path string) error {
@@ -27,9 +25,6 @@ func CloseDB() {
 }
 
 func SaveEmail(email string) error {
-	lock.Lock()
-	defer lock.Unlock()
-
 	if err := db.Put([]byte(email), []byte("registered"), nil); err != nil {
 		log.Printf("Error saving email to LevelDB: %v", err)
 		return err
@@ -38,9 +33,6 @@ func SaveEmail(email string) error {
 }
 
 func IsEmailRegistered(email string) (bool, error) {
-	lock.Lock()
-	defer lock.Unlock()
-
 	_, err := db.Get([]byte(email), nil)
 	if err != nil {
 		if err == leveldb.ErrNotFound {
