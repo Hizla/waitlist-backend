@@ -5,9 +5,7 @@ import (
 	"log"
 )
 
-var (
-	db   *leveldb.DB
-)
+var db *leveldb.DB
 
 func InitDB(path string) error {
 	var err error

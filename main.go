@@ -17,7 +17,7 @@ func main() {
 	app := fiber.New()
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "https://hizla.io",
+		AllowOrigins: os.Getenv("ALLOWED_ORIGINS"),
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
