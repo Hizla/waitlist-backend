@@ -1,0 +1,47 @@
+stages:
+  - lint
+  - test
+  - build
+
+variables:
+  GO_VERSION: "1.23.2"
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - go.sum
+    - go.mod
+    - .cache/go-build
+    - ${GOPATH}/pkg/mod
+
+before_script:
+  - export GOPATH="$CI_PROJECT_DIR/go"
+  - export PATH="$GOPATH/bin:$PATH"
+  - mkdir -p ${GOPATH}/bin
+
+lint:
+  stage: lint
+  image: golangci/golangci-lint:latest
+  script:
+    - golangci-lint run
+  allow_failure: false
+
+test:
+  stage: test
+  image: golang:${GO_VERSION}
+  services:
+    - redis:latest  # Optional: In case you use redis
+  script:
+    - go test ./... -v
+  allow_failure: false
+  coverage: '/^coverage:.*\s(\d+\.\d+)%/'
+
+build:
+  stage: build
+  image: golang:${GO_VERSION}
+  script:
+    - go build -o waitlist-api
+  artifacts:
+    paths:
+      - waitlist-api
+    expire_in: 1 week
