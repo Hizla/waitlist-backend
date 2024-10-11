@@ -10,7 +10,6 @@ const (
 	listenAddr
 	allowedOrigins
 	verboseLogging
-
 	confLen
 )
 
