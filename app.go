@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -9,7 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 )
 
-func serve() error {
+func serve(sig chan os.Signal) error {
 	app := fiber.New()
 
 	// cors
@@ -37,6 +39,15 @@ func serve() error {
 	app.Use(func(c *fiber.Ctx) error {
 		return c.Next()
 	})
+
+	// graceful shutdown
+	go func() {
+		<-sig
+		log.Println("shutting down")
+		if err := app.Shutdown(); err != nil {
+			fmt.Printf("cannot shutdown: %v", err)
+		}
+	}()
 
 	return app.Listen(conf[listenAddr])
 }

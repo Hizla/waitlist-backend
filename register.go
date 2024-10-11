@@ -2,17 +2,21 @@ package main
 
 import (
 	"log"
+	"regexp"
 
 	"github.com/gofiber/fiber/v2"
 )
 
+var emailRegexp = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+
+type registration struct {
+	Email string `json:"email"`
+}
+
 // Waitlist registration route
 func routeRegister(app *fiber.App) {
 	app.Post("/register", func(c *fiber.Ctx) error {
-		type Request struct {
-			Email string `json:"email"`
-		}
-		req := new(Request)
+		req := new(registration)
 
 		if err := c.BodyParser(req); err != nil {
 			log.Printf("Invalid request body: %v", err)
@@ -22,7 +26,7 @@ func routeRegister(app *fiber.App) {
 		}
 
 		// Validate email format
-		if !emailRegex.MatchString(req.Email) {
+		if !emailRegexp.MatchString(req.Email) {
 			log.Printf("Invalid email format: %s", req.Email)
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"message": "Invalid email format",

@@ -2,10 +2,10 @@ package main
 
 import (
 	"log"
-	"regexp"
+	"os"
+	"os/signal"
+	"syscall"
 )
-
-var emailRegex = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 
 func main() {
 
@@ -15,8 +15,11 @@ func main() {
 
 	defer CloseDB()
 
-	if err := serve(); err != nil {
-		log.Printf("cannot serve: %s", err)
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
+
+	if err := serve(sig); err != nil {
+		log.Printf("cannot serve: %v", err)
 	}
 
 	log.Println("application exit")
