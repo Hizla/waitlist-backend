@@ -1,104 +1,34 @@
 package main
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"log"
 	"os"
-	"regexp"
-	"time"
+	"os/signal"
+	"syscall"
+
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
-var emailRegex = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
-
 func main() {
+	var db *leveldb.DB
 
-	app := fiber.New()
+	if d, err := leveldb.OpenFile(conf[dbPath], nil); err != nil {
+		log.Fatalf("cannot open database %q: %v", conf[dbPath], err)
+	} else {
+		db = d
+	}
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Printf("cannot close database %q: %v", conf[dbPath], err)
+		}
+	}()
 
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: os.Getenv("ALLOWED_ORIGINS"),
-		AllowHeaders: "Origin, Content-Type, Accept",
-	}))
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
 
-	if err := InitDB("waitlistdb"); err != nil {
-		log.Fatalf("Failed to initialize LevelDB: %v", err)
+	if err := serve(sig, db); err != nil {
+		log.Printf("cannot serve: %v", err)
 	}
 
-	defer CloseDB()
-
-	app.Use(limiter.New(limiter.Config{
-		Max:        5,
-		Expiration: 7 * 24 * time.Hour, // 1 week expiration
-		LimitReached: func(c *fiber.Ctx) error {
-			log.Printf("Rate limit exceeded for IP: %s", c.IP())
-			return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{
-				"message": "Rate limit exceeded. Max 5 registrations per week.",
-			})
-		},
-	}))
-
-	// Waitlist registration route
-	app.Post("/register", func(c *fiber.Ctx) error {
-		type Request struct {
-			Email string `json:"email"`
-		}
-		req := new(Request)
-
-		if err := c.BodyParser(req); err != nil {
-			log.Printf("Invalid request body: %v", err)
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"message": "Invalid request",
-			})
-		}
-
-		// Validate email format
-		if !emailRegex.MatchString(req.Email) {
-			log.Printf("Invalid email format: %s", req.Email)
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"message": "Invalid email format",
-			})
-		}
-
-		// Check if email is already registered
-		registered, err := IsEmailRegistered(req.Email)
-		if err != nil {
-			log.Printf("Error checking email registration: %v", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"message": "Error checking registration status",
-			})
-		}
-		if registered {
-			log.Printf("Email already registered: %s", req.Email)
-			return c.Status(fiber.StatusConflict).JSON(fiber.Map{
-				"message": "Email already registered",
-			})
-		}
-
-		// Save the email to the waitlist
-		if err := SaveEmail(req.Email); err != nil {
-			log.Printf("Error registering email: %v", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"message": "Error registering email",
-			})
-		}
-
-		log.Printf("Email registered successfully: %s", req.Email)
-		return c.JSON(fiber.Map{
-			"message": "Email registered successfully",
-		})
-	})
-
-
-	// Graceful shutdown
-	app.Use(func(c *fiber.Ctx) error {
-		return c.Next()
-	})
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "3000"
-	}
-
-	log.Fatal(app.Listen(":" + port))
+	log.Println("application exit")
 }
