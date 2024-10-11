@@ -1,11 +1,15 @@
 package main
 
-import "os"
+import (
+	"log"
+	"os"
+)
 
 const (
 	dbPath uint8 = iota
 	listenAddr
 	allowedOrigins
+	verboseLogging
 
 	confLen
 )
@@ -15,10 +19,13 @@ var confEnv = [confLen][2]string{
 	{"DB", "db"},
 	{"LISTEN_ADDR", "127.0.0.1:3000"},
 	{"ALLOWED_ORIGINS", "https://hizla.io"},
+	{"VERBOSE", "1"},
 }
 
 // resolved config values
 var conf [confLen]string
+
+var verbose bool
 
 func init() {
 	for i := 0; i < int(confLen); i++ {
@@ -27,5 +34,14 @@ func init() {
 		} else {
 			conf[i] = v
 		}
+	}
+
+	switch conf[verboseLogging] {
+	case "0":
+		verbose = false
+	case "1":
+		verbose = true
+	default:
+		log.Printf("invalid verbose value %q", conf[verboseLogging])
 	}
 }

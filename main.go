@@ -5,20 +5,28 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 func main() {
+	var db *leveldb.DB
 
-	if err := InitDB(conf[dbPath]); err != nil {
-		log.Fatalf("Failed to initialize LevelDB: %v", err)
+	if d, err := leveldb.OpenFile(conf[dbPath], nil); err != nil {
+		log.Fatalf("cannot open database %q: %v", conf[dbPath], err)
+	} else {
+		db = d
 	}
-
-	defer CloseDB()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Printf("cannot close database %q: %v", conf[dbPath], err)
+		}
+	}()
 
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
 
-	if err := serve(sig); err != nil {
+	if err := serve(sig, db); err != nil {
 		log.Printf("cannot serve: %v", err)
 	}
 

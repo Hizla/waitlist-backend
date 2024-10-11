@@ -9,9 +9,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
-func serve(sig chan os.Signal) error {
+func serve(sig chan os.Signal, db *leveldb.DB) error {
 	app := fiber.New()
 
 	// cors
@@ -33,7 +34,7 @@ func serve(sig chan os.Signal) error {
 	}))
 
 	// /register
-	routeRegister(app)
+	routeRegister(app, db)
 
 	// Graceful shutdown
 	app.Use(func(c *fiber.Ctx) error {
