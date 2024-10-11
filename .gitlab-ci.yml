@@ -21,7 +21,9 @@ before_script:
 
 lint:
   stage: lint
-  image: golangci/golangci-lint:latest
+  image:
+    name: golangci/golangci-lint:latest
+    entrypoint: [ '/bin/bash', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0' ]
   script:
     - golangci-lint run
   allow_failure: false
