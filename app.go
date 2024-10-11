@@ -36,10 +36,8 @@ func serve(sig chan os.Signal, db *leveldb.DB) error {
 	// /register
 	routeRegister(app, db)
 
-	// Graceful shutdown
-	app.Use(func(c fiber.Ctx) error {
-		return c.Next()
-	})
+	// /hcaptcha-site-key
+	routeHCaptchaSiteKey(app)
 
 	// graceful shutdown
 	go func() {

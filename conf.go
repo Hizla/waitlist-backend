@@ -9,6 +9,8 @@ const (
 	dbPath uint8 = iota
 	listenAddr
 	allowedOrigins
+	hCaptchaSecret
+	hCaptchaSiteKey
 	verboseLogging
 	confLen
 )
@@ -18,6 +20,8 @@ var confEnv = [confLen][2]string{
 	{"DB", "db"},
 	{"LISTEN_ADDR", "127.0.0.1:3000"},
 	{"ALLOWED_ORIGINS", "https://hizla.io"},
+	{"HCAPTCHA_SECRET", "unset"},
+	{"HCAPTCHA_SITE_KEY", "unset"},
 	{"VERBOSE", "1"},
 }
 
