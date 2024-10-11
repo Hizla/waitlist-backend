@@ -1,27 +1,26 @@
 package main
 
 import (
+	"log"
+	"regexp"
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
-	"log"
-	"os"
-	"regexp"
-	"time"
 )
 
 var emailRegex = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 
 func main() {
-
 	app := fiber.New()
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: os.Getenv("ALLOWED_ORIGINS"),
+		AllowOrigins: conf[allowedOrigins],
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
-	if err := InitDB("waitlistdb"); err != nil {
+	if err := InitDB(conf[dbPath]); err != nil {
 		log.Fatalf("Failed to initialize LevelDB: %v", err)
 	}
 
@@ -89,16 +88,10 @@ func main() {
 		})
 	})
 
-
 	// Graceful shutdown
 	app.Use(func(c *fiber.Ctx) error {
 		return c.Next()
 	})
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "3000"
-	}
-
-	log.Fatal(app.Listen(":" + port))
+	log.Fatal(app.Listen(conf[listenAddr]))
 }
