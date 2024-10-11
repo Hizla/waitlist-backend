@@ -1,4 +1,4 @@
-module git.randomchars.ne/hizla/waitlist/backend
+module git.randomchars.net/hizla/waitlist/backend
 
 go 1.22.3
 
