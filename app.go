@@ -17,7 +17,7 @@ func serve(sig chan os.Signal, db *leveldb.DB) error {
 
 	// cors
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: []string{conf[allowedOrigins]},
+		AllowOrigins: []string{conf[allowedURL]},
 		AllowHeaders: []string{"Origin", "Content-Type", "Accept"},
 	}))
 
