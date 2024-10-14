@@ -4,21 +4,24 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-// Route to expose hCaptcha site key
+type respHSiteKey struct {
+	Success bool   `json:"success"`
+	SiteKey string `json:"hcaptcha_site_key"`
+}
+
+// Route to expose hCaptcha site key.
+// Returns a constant pre-generated response
+// to avoid unnecessary allocations or serialisations
 func routeHCaptchaSiteKey(app *fiber.App, stub bool, siteKey string) {
+	var resp string
 	if stub {
-		app.Get("/captcha", func(c fiber.Ctx) error {
-			return c.JSON(fiber.Map{
-				"success": false,
-				"message": "hCaptcha is not enabled on this instance",
-			})
-		})
+		resp = mustConstResp(newMessage(false, "hCaptcha is not enabled on this instance."))
 	} else {
-		app.Get("/captcha", func(c fiber.Ctx) error {
-			return c.JSON(fiber.Map{
-				"success":           true,
-				"hcaptcha_site_key": siteKey,
-			})
-		})
+		resp = mustConstResp(respHSiteKey{true, siteKey})
 	}
+
+	app.Get("/captcha", func(c fiber.Ctx) error {
+		c.Set("Content-Type", "application/json; charset=utf-8")
+		return c.SendString(resp)
+	})
 }
