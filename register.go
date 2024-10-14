@@ -3,8 +3,9 @@ package main
 import (
 	"log"
 	"regexp"
-	"github.com/gofiber/fiber/v3"
+
 	"github.com/gofiber/contrib/hcaptcha"
+	"github.com/gofiber/fiber/v3"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
@@ -12,19 +13,6 @@ var emailRegexp = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$
 
 type registration struct {
 	Email string `json:"email"`
-}
-
-// Middleware to conditionally apply hCaptcha
-func conditionalCaptcha(captcha fiber.Handler) fiber.Handler {
-	return func(c fiber.Ctx) error {
-		if conf[hCaptchaSecret] == "unset" {
-			if verbose {
-				log.Printf("Captcha bypassed for %q", c.IP())
-			}
-			return c.Next()
-		}
-		return captcha(c)
-	}
 }
 
 // Waitlist registration route
@@ -83,20 +71,6 @@ func routeRegister(app *fiber.App, db *leveldb.DB) {
 		log.Printf("registered email %q", req.Email)
 		return c.JSON(fiber.Map{
 			"message": "Email registered successfully",
-		})
-	})
-}
-
-// Route to expose hCaptcha site key
-func routeHCaptchaSiteKey(app *fiber.App) {
-	app.Get("/hcaptcha-site-key", func(c fiber.Ctx) error {
-		if conf[hCaptchaSiteKey] == "unset" {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"message": "hCaptcha site key not configured",
-			})
-		}
-		return c.JSON(fiber.Map{
-			"hcaptcha_site_key": conf[hCaptchaSiteKey],
 		})
 	})
 }
