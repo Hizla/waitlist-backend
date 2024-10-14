@@ -10,18 +10,18 @@ const (
 	listenAddr
 	allowedURL
 	hCaptchaSiteKey
-	hCaptchaSecret
+	hCaptchaSecretKey
 	verboseLogging
 )
 
 // env variable, default pairing
 var confEnv = [...][2]string{
-	dbPath:          {"DB", "db"},
-	listenAddr:      {"LISTEN_ADDR", "127.0.0.1:3000"},
-	allowedURL:      {"ALLOWED_URL", "https://hizla.io"},
-	hCaptchaSiteKey: {"HCAPTCHA_SITE_KEY", "unset"},
-	hCaptchaSecret:  {"HCAPTCHA_SECRET", "unset"},
-	verboseLogging:  {"VERBOSE", "1"},
+	dbPath:            {"DB", "db"},
+	listenAddr:        {"LISTEN_ADDR", "127.0.0.1:3000"},
+	allowedURL:        {"ALLOWED_URL", "https://hizla.io"},
+	hCaptchaSiteKey:   {"HCAPTCHA_SITE_KEY", "unset"},
+	hCaptchaSecretKey: {"HCAPTCHA_SECRET_KEY", "unset"},
+	verboseLogging:    {"VERBOSE", "1"},
 }
 
 // resolved config values

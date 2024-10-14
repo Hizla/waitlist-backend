@@ -4,7 +4,6 @@ import (
 	"log"
 	"regexp"
 
-	"github.com/gofiber/contrib/hcaptcha"
 	"github.com/gofiber/fiber/v3"
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -16,13 +15,8 @@ type registration struct {
 }
 
 // Waitlist registration route
-func routeRegister(app *fiber.App, db *leveldb.DB) {
-
-	captcha := hcaptcha.New(hcaptcha.Config{
-		SecretKey: conf[hCaptchaSecret],
-	})
-
-	app.Post("/register", conditionalCaptcha(captcha), func(c fiber.Ctx) error {
+func routeRegister(app *fiber.App, db *leveldb.DB, captcha fiber.Handler) {
+	app.Post("/register", func(c fiber.Ctx) error {
 		req := new(registration)
 
 		// Parse and validate the request
@@ -72,5 +66,5 @@ func routeRegister(app *fiber.App, db *leveldb.DB) {
 		return c.JSON(fiber.Map{
 			"message": "Email registered successfully",
 		})
-	})
+	}, captcha)
 }
