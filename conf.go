@@ -8,27 +8,29 @@ import (
 const (
 	dbPath uint8 = iota
 	listenAddr
-	allowedOrigins
+	allowedURL
+	hCaptchaSiteKey
+	hCaptchaSecretKey
 	verboseLogging
-
-	confLen
 )
 
 // env variable, default pairing
-var confEnv = [confLen][2]string{
-	{"DB", "db"},
-	{"LISTEN_ADDR", "127.0.0.1:3000"},
-	{"ALLOWED_ORIGINS", "https://hizla.io"},
-	{"VERBOSE", "1"},
+var confEnv = [...][2]string{
+	dbPath:            {"DB", "db"},
+	listenAddr:        {"LISTEN_ADDR", "127.0.0.1:3000"},
+	allowedURL:        {"ALLOWED_URL", "https://hizla.io"},
+	hCaptchaSiteKey:   {"HCAPTCHA_SITE_KEY", "unset"},
+	hCaptchaSecretKey: {"HCAPTCHA_SECRET_KEY", "unset"},
+	verboseLogging:    {"VERBOSE", "1"},
 }
 
 // resolved config values
-var conf [confLen]string
+var conf [len(confEnv)]string
 
 var verbose bool
 
 func init() {
-	for i := 0; i < int(confLen); i++ {
+	for i := 0; i < len(confEnv); i++ {
 		if v, ok := os.LookupEnv(confEnv[i][0]); !ok {
 			conf[i] = confEnv[i][1]
 		} else {

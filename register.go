@@ -4,7 +4,7 @@ import (
 	"log"
 	"regexp"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
@@ -15,11 +15,12 @@ type registration struct {
 }
 
 // Waitlist registration route
-func routeRegister(app *fiber.App, db *leveldb.DB) {
-	app.Post("/register", func(c *fiber.Ctx) error {
+func routeRegister(app *fiber.App, db *leveldb.DB, captcha fiber.Handler) {
+	app.Post("/register", func(c fiber.Ctx) error {
 		req := new(registration)
 
-		if err := c.BodyParser(req); err != nil {
+		// Parse and validate the request
+		if err := c.Bind().Body(req); err != nil {
 			if verbose {
 				log.Printf("invalid request from %q: %v", c.IP(), err)
 			}
@@ -65,5 +66,5 @@ func routeRegister(app *fiber.App, db *leveldb.DB) {
 		return c.JSON(fiber.Map{
 			"message": "Email registered successfully",
 		})
-	})
+	}, captcha)
 }
