@@ -12,7 +12,7 @@ type respHSiteKey struct {
 // Route to expose hCaptcha site key.
 // Returns a constant pre-generated response
 // to avoid unnecessary allocations or serialisations
-func routeHCaptchaSiteKey(app *fiber.App, stub bool, siteKey string) {
+func routeHCaptchaSiteKey(app *fiber.App, p string, stub bool, siteKey string) {
 	var resp string
 	if stub {
 		resp = mustConstResp(newMessage(false, "hCaptcha is not enabled on this instance."))
@@ -20,7 +20,7 @@ func routeHCaptchaSiteKey(app *fiber.App, stub bool, siteKey string) {
 		resp = mustConstResp(respHSiteKey{true, siteKey})
 	}
 
-	app.Get("/captcha", func(c fiber.Ctx) error {
+	app.Get(p, func(c fiber.Ctx) error {
 		c.Set("Content-Type", "application/json; charset=utf-8")
 		return c.SendString(resp)
 	})

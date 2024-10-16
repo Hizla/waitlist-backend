@@ -54,11 +54,8 @@ func serve(sig chan os.Signal, db *leveldb.DB) error {
 			confEnv[hCaptchaSiteKey][0], confEnv[hCaptchaSecretKey][0])
 	}
 
-	// /register
-	routeRegister(app, db, captcha)
-
-	// /hcaptcha-site-key
-	routeHCaptchaSiteKey(app, !hCaptchaEnable, conf[hCaptchaSiteKey])
+	routeHCaptchaSiteKey(app, "/api", !hCaptchaEnable, conf[hCaptchaSiteKey])
+	routeRegister(app, "/api/register", db, captcha)
 
 	// graceful shutdown
 	go func() {
