@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"sync/atomic"
 	"time"
@@ -73,5 +74,13 @@ func serve(sig chan os.Signal, db *leveldb.DB) error {
 		}
 	}()
 
-	return app.Listen(conf[listenAddr])
+	if conf[listen] == "unset" {
+		return app.Listen(conf[listenAddr])
+	} else {
+		if l, err := net.Listen("unix", conf[listen]); err != nil {
+			return err
+		} else {
+			return app.Listener(l)
+		}
+	}
 }

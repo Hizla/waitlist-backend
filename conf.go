@@ -7,6 +7,7 @@ import (
 
 const (
 	dbPath uint8 = iota
+	listen
 	listenAddr
 	allowedURL
 	hCaptchaSiteKey
@@ -17,6 +18,7 @@ const (
 // env variable, default pairing
 var confEnv = [...][2]string{
 	dbPath:            {"DB", "db"},
+	listen:            {"LISTEN", "unset"},
 	listenAddr:        {"LISTEN_ADDR", "127.0.0.1:3000"},
 	allowedURL:        {"ALLOWED_URL", "https://hizla.io"},
 	hCaptchaSiteKey:   {"HCAPTCHA_SITE_KEY", "unset"},
