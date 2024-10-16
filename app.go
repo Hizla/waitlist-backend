@@ -80,6 +80,9 @@ func serve(sig chan os.Signal, db *leveldb.DB) error {
 		if l, err := net.Listen("unix", conf[listen]); err != nil {
 			return err
 		} else {
+			if err = os.Chmod(conf[listen], 0777); err != nil {
+				log.Printf("cannot change ownership of socket %q: %v", conf[listen], err)
+			}
 			return app.Listener(l)
 		}
 	}
