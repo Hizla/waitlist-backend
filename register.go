@@ -15,8 +15,8 @@ type registration struct {
 }
 
 // Waitlist registration route
-func routeRegister(app *fiber.App, db *leveldb.DB, captcha fiber.Handler) {
-	app.Post("/register", func(c fiber.Ctx) error {
+func routeRegister(app *fiber.App, p string, db *leveldb.DB, captcha fiber.Handler) {
+	app.Post(p, func(c fiber.Ctx) error {
 		req := new(registration)
 
 		// Parse and validate the request
