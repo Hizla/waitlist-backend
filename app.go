@@ -6,12 +6,10 @@ import (
 	"net"
 	"os"
 	"sync/atomic"
-	"time"
 
 	"github.com/gofiber/contrib/hcaptcha"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
-	"github.com/gofiber/fiber/v3/middleware/limiter"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
@@ -22,18 +20,6 @@ func serve(sig chan os.Signal, db *leveldb.DB) error {
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: []string{conf[allowedURL]},
 		AllowHeaders: []string{"Origin", "Content-Type", "Accept"},
-	}))
-
-	// rate limiting
-	app.Use(limiter.New(limiter.Config{
-		Max:        5,
-		Expiration: 7 * 24 * time.Hour, // 1 week expiration
-		LimitReached: func(c fiber.Ctx) error {
-			log.Printf("Rate limit exceeded for IP: %s", c.IP())
-			return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{
-				"message": "Rate limit exceeded. Max 5 registrations per week.",
-			})
-		},
 	}))
 
 	var captcha fiber.Handler
