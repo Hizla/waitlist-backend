@@ -24,7 +24,7 @@ func main() {
 	}()
 
 	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
+	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
 
 	if err := serve(sig, db); err != nil {
 		log.Printf("cannot serve: %v", err)
