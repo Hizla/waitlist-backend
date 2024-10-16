@@ -3,7 +3,9 @@ package main
 import (
 	"log"
 	"regexp"
+	"strconv"
 	"sync/atomic"
+	"time"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -18,6 +20,7 @@ type registration struct {
 // Waitlist registration route
 func routeRegister(app *fiber.App, p string, db *leveldb.DB, count *atomic.Uint64, captcha fiber.Handler) {
 	app.Post(p, func(c fiber.Ctx) error {
+		t := time.Now().UTC()
 		req := new(registration)
 
 		// Parse and validate the request
@@ -47,8 +50,17 @@ func routeRegister(app *fiber.App, p string, db *leveldb.DB, count *atomic.Uint6
 			return c.Status(fiber.StatusConflict).JSON(newMessage(false, "Email already registered"))
 		}
 
+		// represent current time
+		var bt []byte
+		if b, err := t.MarshalBinary(); err != nil {
+			log.Printf("cannot encode current time: %v", err)
+			bt = []byte(strconv.Itoa(int(t.Unix())))
+		} else {
+			bt = b
+		}
+
 		// Save the email to the waitlist
-		if err := db.Put([]byte(req.Email), []byte{'x'}, nil); err != nil {
+		if err := db.Put([]byte(req.Email), bt, nil); err != nil {
 			log.Printf("cannot register email %q: %v", req.Email, err)
 			return c.Status(fiber.StatusInternalServerError).JSON(newMessage(false, "Cannot register email"))
 		}
