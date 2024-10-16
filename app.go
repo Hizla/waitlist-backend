@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync/atomic"
 	"time"
 
 	"github.com/gofiber/contrib/hcaptcha"
@@ -54,8 +55,14 @@ func serve(sig chan os.Signal, db *leveldb.DB) error {
 			confEnv[hCaptchaSiteKey][0], confEnv[hCaptchaSecretKey][0])
 	}
 
+	count := new(atomic.Uint64)
+
 	routeHCaptchaSiteKey(app, "/api", !hCaptchaEnable, conf[hCaptchaSiteKey])
-	routeRegister(app, "/api/register", db, captcha)
+	routeRegister(app, "/api/register", db, count, captcha)
+
+	if err := routeCount(app, "/api/count", db, count); err != nil {
+		return err
+	}
 
 	// graceful shutdown
 	go func() {
