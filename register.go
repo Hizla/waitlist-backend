@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"regexp"
+	"sync/atomic"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -15,7 +16,7 @@ type registration struct {
 }
 
 // Waitlist registration route
-func routeRegister(app *fiber.App, p string, db *leveldb.DB, captcha fiber.Handler) {
+func routeRegister(app *fiber.App, p string, db *leveldb.DB, count *atomic.Uint64, captcha fiber.Handler) {
 	app.Post(p, func(c fiber.Ctx) error {
 		req := new(registration)
 
@@ -53,6 +54,7 @@ func routeRegister(app *fiber.App, p string, db *leveldb.DB, captcha fiber.Handl
 		}
 
 		log.Printf("registered email %q", req.Email)
+		count.Add(1)
 		return c.JSON(newMessage(true, "Email registered successfully"))
 	}, captcha)
 }
