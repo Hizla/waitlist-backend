@@ -19,7 +19,7 @@ type registration struct {
 
 // Waitlist registration route
 func routeRegister(app *fiber.App, p string, db *leveldb.DB, count *atomic.Uint64, captcha fiber.Handler) {
-	app.Post(p, func(c fiber.Ctx) error {
+	app.Post(p, rateLimiter(), func(c fiber.Ctx) error {
 		t := time.Now().UTC()
 		req := new(registration)
 
