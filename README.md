@@ -46,6 +46,19 @@ A lightweight, high-performance waitlist backend written in Go, using [Fiber v3]
      ```
 
 
+## Configuration Documentation
+
+| Name                | Usage                                            | Default          |
+|---------------------|--------------------------------------------------|------------------|
+| DB                  | Filesystem path to database. Can be relative.    | db               |
+| LISTEN              | Filesystem path to UNIX socket to listen on.     | unset            |
+| LISTEN_ADDR         | Address to listen on if LISTEN is unset.         | 127.0.0.1:3000   |
+| ALLOWED_URL         | Allowed URL enforced by CORS.                    | https://hizla.io |
+| HCAPTCHA_SITE_KEY   | hCaptcha site key. Disables hCaptcha if unset.   | unset            |
+| HCAPTCHA_SECRET_KEY | hCaptcha secret key. Disables hCaptcha if unset. | unset            |
+| VERBOSE             | Verbose logging. Set 0 to disable.               | 1                |
+
+
 ## API Documentation
 
 ### Routes
