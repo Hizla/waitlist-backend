@@ -17,10 +17,14 @@ func serve(sig chan os.Signal, db *leveldb.DB) error {
 	app := fiber.New()
 
 	// cors
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: []string{conf[allowedURL]},
-		AllowHeaders: []string{"Origin", "Content-Type", "Accept"},
-	}))
+	if conf[allowedURL] != "unset" {
+		app.Use(cors.New(cors.Config{
+			AllowOrigins: []string{conf[allowedURL]},
+			AllowHeaders: []string{"Origin", "Content-Type", "Accept"},
+		}))
+	} else {
+		log.Println("CORS disabled")
+	}
 
 	var captcha fiber.Handler
 	hCaptchaEnable := conf[hCaptchaSiteKey] != "unset" && conf[hCaptchaSecretKey] != "unset"
