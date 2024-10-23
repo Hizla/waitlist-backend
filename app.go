@@ -23,7 +23,8 @@ func serve(sig chan os.Signal, db *leveldb.DB) error {
 			AllowHeaders: []string{"Origin", "Content-Type", "Accept"},
 		}))
 	} else {
-		log.Println("CORS disabled")
+		log.Println("CORS unset")
+		app.Use(cors.New(cors.ConfigDefault))
 	}
 
 	var captcha fiber.Handler
